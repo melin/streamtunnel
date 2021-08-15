@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <!-- interactiveMode
+     | This will determine whether maven prompts you when it needs input. If set to false,
+     | maven will use a sensible default value, perhaps based on some other setting, for
+     | the parameter in question.
+     |
+     | Default: true
+    <interactiveMode>true</interactiveMode>-->
+    <!-- offline
+     | Determines whether maven should attempt to connect to the network when executing a build.
+     | This will have an effect on artifact downloads, artifact deployment, and others.
+     |
+     | Default: false
+    <offline>false</offline>-->
+    <pluginGroups/>
+
+    <proxies/>
+
+    <servers>
+        <server>
+            <id>dztech-nexus</id>
+            <username>admin</username>
+            <password>admin168</password>
+        </server>
+    </servers>
+
+    <mirrors>
+        <mirror>
+            <id>dztech-nexus</id>
+            <url>http://10.1.20.102:8081/nexus/content/groups/public/</url>
+            <mirrorOf>dztech-nexus,!cloudera</mirrorOf>
+        </mirror>
+
+        <mirror>
+            <id>aliyun-nexus</id>
+            <name>aliyun-nexus</name>
+            <mirrorOf>central,!cloudera</mirrorOf>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+        </mirror>
+    </mirrors>
+
+    <profiles>
+        <profile>
+            <id>dztech</id>
+            <properties>
+                <altSnapshotDeploymentRepository>dztech-nexus::default::http://10.1.20.102:8081/nexus/content/repositories/snapshots/</altSnapshotDeploymentRepository>
+                <altReleaseDeploymentRepository>dztech-nexus::default::http://10.1.20.102:8081/nexus/content/repositories/releases/</altReleaseDeploymentRepository>
+            </properties>
+            <repositories>
+                <repository>
+                    <id>dztech-nexus</id>
+                    <url>http://10.1.20.102:8081/nexus/content/groups/public/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>dztech-nexus</id>
+                    <url>http://10.1.20.102:8081/nexus/content/groups/public</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+
+        <profile>
+            <id>aliyun</id>
+            <repositories>
+                <repository>
+                    <id>aliyun-nexus</id>
+                    <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>aliyun-nexus</id>
+                    <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+
+        <profile>
+            <id>cloudera</id>
+            <repositories>
+                <repository>
+                    <id>cloudera</id>
+                    <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+
+        <profile>
+            <id>jdk-1.8</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.source>1.8</maven.compiler.source>
+                <maven.compiler.target>1.8</maven.compiler.target>
+                <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+            </properties>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>aliyun</activeProfile>
+        <activeProfile>cloudera</activeProfile>
+        <activeProfile>dztech</activeProfile>
+    </activeProfiles>
+</settings>
+
