@@ -24,12 +24,12 @@ public class LogCollectMetricService {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	public static String CURRENTIPLONG;
+	public static String currentIpLong;
 
 	static {
 		try {
 			String currentIp = NetUtils.determineIpAddress();
-			CURRENTIPLONG = String.valueOf(CommonUtils.ipToLong(currentIp));
+			currentIpLong = String.valueOf(CommonUtils.ipToLong(currentIp));
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 		}
@@ -55,7 +55,7 @@ public class LogCollectMetricService {
 	public LogCollectMetric createEntity(String code, String partition, long msgCount, long msgBytes) {
 		LogCollectMetric entity = new LogCollectMetric();
 		entity.setCode(code);
-		entity.setNodeIp(CURRENTIPLONG);
+		entity.setNodeIp(currentIpLong);
 		entity.setMinuteCount(msgCount);
 		entity.setMinuteBytes(msgBytes);
 

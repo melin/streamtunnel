@@ -28,7 +28,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.ResourceUrlEncodingFilter;
 
-import javax.sql.DataSource;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
