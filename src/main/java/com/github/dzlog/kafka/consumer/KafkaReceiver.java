@@ -299,20 +299,8 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 
 		if (lastHivePartition != null && !lastHivePartition.equals(currentHivePartition)) {
 			topicPartitionLastHivePartition.put(topicPartition, currentHivePartition);
-			addPartitionInfo(collectConfig, lastHivePartition);
+			hivePartitionService.addPartitionInfo(collectConfig, lastHivePartition);
 		}
 	}
 
-	private void addPartitionInfo(LogCollectConfig collectConfig, String lastHivePartition) {
-		String dbTableName = collectConfig.getDatabaseName() + "." + collectConfig.getTableName();
-
-		boolean exists = hivePartitionService.checkPartitionExists(collectConfig, lastHivePartition);
-		if (exists) {
-			boolean result = hiveJdbcClient.addPartition(dbTableName, lastHivePartition);
-			if (result) {
-				// 如果没有dc_table_partition 表，可以注释下面一行
-				hivePartitionService.recordInfoToPartitionTable(collectConfig, lastHivePartition);
-			}
-		}
-	}
 }

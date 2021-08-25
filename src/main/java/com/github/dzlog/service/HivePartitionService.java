@@ -3,6 +3,7 @@ package com.github.dzlog.service;
 import com.github.dzlog.entity.HivePartition;
 import com.github.dzlog.entity.LogCollectConfig;
 import com.github.dzlog.support.ConfigurationLoader;
+import com.github.dzlog.support.HiveJdbcClient;
 import com.github.dzlog.util.HdfsUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hadoop.conf.Configuration;
@@ -32,6 +33,9 @@ public class HivePartitionService {
 	@Autowired
 	private ConfigurationLoader configurationLoader;
 
+	@Autowired
+	private HiveJdbcClient hiveJdbcClient;
+
 	public boolean checkPartitionExists(LogCollectConfig collectConfig, String partitionSpec) {
 		try {
 			String basePath = "/user/hive/warehouse/" + collectConfig.getDatabaseName() + ".db/" + collectConfig.getTableName();
@@ -42,6 +46,19 @@ public class HivePartitionService {
 		} catch (Exception e) {
 			LOGGER.warn("检测分区路径是否存在失败: {}", e.getMessage());
 			return false;
+		}
+	}
+
+	public void addPartitionInfo(LogCollectConfig collectConfig, String lastHivePartition) {
+		String dbTableName = collectConfig.getDatabaseName() + "." + collectConfig.getTableName();
+
+		boolean exists = this.checkPartitionExists(collectConfig, lastHivePartition);
+		if (exists) {
+			boolean result = hiveJdbcClient.addPartition(dbTableName, lastHivePartition);
+			if (result) {
+				// 如果没有dc_table_partition 表 ，可以注释下面一行
+				this.recordInfoToPartitionTable(collectConfig, lastHivePartition);
+			}
 		}
 	}
 
