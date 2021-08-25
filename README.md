@@ -1,13 +1,14 @@
 ## 数据采集平台
-从kafka 中消费数据写入hive表中，一般很容想到用spark，flink消费数据写入hive表中。业务需要申请kafka topic，再写spark/flink 任务，把数据写入hive 表，过程比较长。如果需要采集应用日志很多，启动的spark/flink任务相应也很多
+从kafka 中消费数据写入hive表中，一般很容想到用spark，flink消费数据写入hive表中。业务需要申请kafka topic，再写spark/flink 任务，把数据写入hive 表，需要依赖spark/flink，方案很重。如果需要采集应用日志很多，启动的spark/flink任务相应也很多
 
-为了平台化解决数据采集问题，用户只需要填写topic 和要写入hive表名，写入数据自动完成，dzlog不依赖spark/flink，是一个spring boot 应用，基于spring kafka 同时消费多个topic并发消费数据，补数据多个节点分布式消费数据，增加吞吐能力。
+dzlog不依赖spark/flink，是一个spring boot 应用，基于spring kafka 同时消费多个topic并发消费数据，每一个topic消费数据先在本地生成parquet文件，按照最大数量或者时间定时上传到表分区目录中。
+这样可以平台化实现数据采集能力，基于dc_log_collect_config 表开发一个管理页面。
 
 ## dzlog 规则
-1. 每十五分钟一个分区，按照消息接收时间作为区分。
-2. 只写入原始数据，不做解析，用户单独跑ETL任务解析数据。
-3. 支持parquet、orc、iceberg三种格式。
-4. 自动合并碎片文件。
+1. 每十五分钟一个分区(00, 15, 30, 45)，按照消息接收时间作为区分。
+2. 当前写入分区，对用户不可见，切换到下个分区执行: ALTER TABLE ADD PARTITION
+3. 只写入原始数据，不做解析，用户单独跑ETL任务解析数据。
+4. 支持parquet、hudi 两种格式。
 
 ## 采集配置建表脚本
 ```sql
