@@ -12,34 +12,20 @@ import java.util.Set;
  */
 public class TopicConsumerInfo {
 
-	private String topic;
-
 	private String currentHivePartition;
 
 	private long recordCount = 0;
 
-	private long lastFlushTime = 0;
+	private long lastFlushTime = System.currentTimeMillis();
 
 	/**
 	 * 采集code -> AbstractFileWriter
 	 */
 	private Map<String, AbstractFileWriter> fileWriterMap = new HashMap<>();
 
-	public TopicConsumerInfo(String topic) {
-		this.topic = topic;
-	}
-
 	public void incrementRecordCount() {
         recordCount++;
     }
-
-	public String getTopic() {
-		return topic;
-	}
-
-	public void setTopic(String topic) {
-		this.topic = topic;
-	}
 
 	public String getCurrentHivePartition() {
 		return currentHivePartition;

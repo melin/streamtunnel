@@ -178,7 +178,7 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 			for (String partitionName : handler.getPartitionToTopicConsumerInfoMap().keySet()) {
 				handler.flushTopic("new", partitionName);
 			}
-			//@TODO dcLogMergeService.reduceCount();
+
 			handler.setCurrentPartition(currentHivePartition);
 			LOGGER.info("thread {} reduceCount", Thread.currentThread().getId());
 		}

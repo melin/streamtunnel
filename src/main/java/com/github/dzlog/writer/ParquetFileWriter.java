@@ -3,6 +3,7 @@ package com.github.dzlog.writer;
 import com.github.dzlog.entity.LogCollectConfig;
 import com.github.dzlog.kafka.LogEvent;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.parquet.column.ParquetProperties;
 import org.apache.parquet.example.data.Group;
 import org.apache.parquet.example.data.simple.SimpleGroupFactory;
@@ -24,11 +25,13 @@ public class ParquetFileWriter extends AbstractFileWriter {
 
     public ParquetFileWriter(SimpleGroupFactory groupFactory, Configuration configuration,
                              LogCollectConfig collectConfig, String hivePartition) {
-        super(configuration, collectConfig, hivePartition);
+        super(collectConfig, hivePartition);
 
         this.groupFactory = groupFactory;
         try {
-            this.writer = ExampleParquetWriter.builder(this.getHdfsPath())
+            String localFile = this.getLocalFile();
+            Path locaPath = new Path(localFile);
+            this.writer = ExampleParquetWriter.builder(locaPath)
                     .withConf(configuration)
                     .withWriterVersion(ParquetProperties.WriterVersion.PARQUET_2_0)
                     .withCompressionCodec(CompressionCodecName.ZSTD).build();
@@ -48,6 +51,6 @@ public class ParquetFileWriter extends AbstractFileWriter {
 
     @Override
     public void close() throws IOException {
-
+        writer.close();
     }
 }

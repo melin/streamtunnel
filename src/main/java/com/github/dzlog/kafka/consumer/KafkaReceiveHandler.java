@@ -118,8 +118,10 @@ public class KafkaReceiveHandler implements Closeable {
 
                     IOUtils.closeQuietly(fileWriter);
                     topicConsumerInfo.removeFileWriter(code);
-                    LOGGER.info("partition 重新平衡，[{}] [{}] 被其他线程重新消费，delete file {}", code, partitionName, fileWriter.getLocalFile().toString());
-                    FileUtils.deleteQuietly(fileWriter.getLocalFile().toFile());
+
+                    String localFile = fileWriter.getLocalFile();
+                    LOGGER.info("partition 重新平衡，[{}] [{}] 被其他线程重新消费，delete file {}", code, partitionName, localFile);
+                    FileUtils.deleteQuietly(new File(localFile));
                 }
             }
             return;
@@ -147,17 +149,17 @@ public class KafkaReceiveHandler implements Closeable {
                 long msgBytes = currentWriter.getMsgBytes();
                 if (count > 0) {
                     long times = updateLocalFile(currentWriter);
-                    String file = currentWriter.getLocalFile().toString();
+                    String localfile = currentWriter.getLocalFile();
 
                     if (times > 500) {
                         LOGGER.error("[{}] thread {} prepare to flush topicPartition {} (code:{}), times: {}ms, total count: {}, file: {}",
-                                mode, threadId, partitionName, code, times, count, file);
+                                mode, threadId, partitionName, code, times, count, localfile);
                     } else if (times > 100) {
                         LOGGER.warn("[{}] thread {} prepare to flush topicPartition {} (code:{}), times: {}ms, total count: {}, file: {}",
-                                mode, threadId, partitionName, code, times, count, file);
+                                mode, threadId, partitionName, code, times, count, localfile);
                     } else {
                         LOGGER.info("[{}] thread {} prepare to flush topicPartition {} (code:{}), times: {}ms, total count: {}, file: {}",
-                                mode, threadId, partitionName, code, times, count, file);
+                                mode, threadId, partitionName, code, times, count, localfile);
                     }
 
                     synchronized (CODE_LOCK_MAP.get(code)) {
@@ -223,22 +225,23 @@ public class KafkaReceiveHandler implements Closeable {
         long startTime = System.currentTimeMillis();
         Configuration remoteConf = dzLogContext.getConfiguration();
 
-        checkForCreatePartition(currentWriter.getCode(), currentWriter.getHdfsPath().getParent());
+        Path hdfsPath = currentWriter.getHdfsPath();
+        checkForCreatePartition(currentWriter.getCode(), hdfsPath.getParent());
 
-        String localFile = currentWriter.getLocalFile().toString();
+        String localFilePath = currentWriter.getLocalFile();
         try {
-            java.nio.file.Path localFilePath = currentWriter.getLocalFile();
-            File file = localFilePath.toFile();
+            File localFile = new File(localFilePath);
             // 避免空文件.
-            if (file.exists() && file.length() > 0) {
-                HdfsUtils.putLocalFile(remoteConf, new Path(localFile), currentWriter.getHdfsPath());
+            if (localFile.exists() && localFile.length() > 0) {
+                LOGGER.info("本地文件上传hdfs: " + hdfsPath);
+                HdfsUtils.putLocalFile(remoteConf, new Path(localFilePath), hdfsPath);
             }
         } catch (Exception e) {
-            LOGGER.error("上传失败，重试一次：" + localFile + ", 失败原因：" + e.getMessage());
+            LOGGER.error("上传失败，重试一次：" + localFilePath + ", 失败原因：" + e.getMessage());
             try {
-                HdfsUtils.putLocalFile(remoteConf, new Path(localFile), currentWriter.getHdfsPath());
+                HdfsUtils.putLocalFile(remoteConf, new Path(localFilePath), hdfsPath);
             } catch (Exception e1) {
-                LOGGER.error("上传失败，重试一次又失败：" + localFile + ", 失败原因：" + e1.getMessage());
+                LOGGER.error("上传失败，重试一次又失败：" + localFilePath + ", 失败原因：" + e1.getMessage());
             }
         }
 
@@ -298,7 +301,7 @@ public class KafkaReceiveHandler implements Closeable {
         String topicPartition = logEvent.getTopicPartition();
         try {
             if (!partitionToTopicConsumerInfoMap.containsKey(topicPartition)) {
-                TopicConsumerInfo topicConsumerInfo = new TopicConsumerInfo(topicPartition);
+                TopicConsumerInfo topicConsumerInfo = new TopicConsumerInfo();
                 topicConsumerInfo.setCurrentHivePartition(currentHivePartition);
                 partitionToTopicConsumerInfoMap.put(topicPartition, topicConsumerInfo);
                 CODE_LOCK_MAP.putIfAbsent(code, new Object());
@@ -321,9 +324,10 @@ public class KafkaReceiveHandler implements Closeable {
                         IOUtils.closeQuietly(fileWriter);
                         topicConsumerInfo.removeFileWriter(code);
 
-                        FileUtils.deleteQuietly(fileWriter.getLocalFile().toFile());
+                        String localFile = fileWriter.getLocalFile();
+                        FileUtils.deleteQuietly(new File(localFile));
                         LOGGER.info("rollback msg, [{}], lastoffset: {}, currentOffset: {}, delete file {}",
-                                topicPartition, lastoffset, logEvent.getOffset(), fileWriter.getLocalFile().toString());
+                                topicPartition, lastoffset, logEvent.getOffset(), localFile);
 
                         fileWriter = createNewWriter(code, topicPartition, currentHivePartition);
                     }
@@ -332,7 +336,6 @@ public class KafkaReceiveHandler implements Closeable {
 
             if (fileWriter != null) {
                 fileWriter.write(logEvent);
-                fileWriter.setLastWriteTime(System.currentTimeMillis());
                 fileWriter.incrementCount();
                 fileWriter.incrementMsgBytes(logEvent.getMsgBytes());
 
@@ -375,20 +378,20 @@ public class KafkaReceiveHandler implements Closeable {
         boolean flush = false;
         TopicConsumerInfo topicConsumerInfo = partitionToTopicConsumerInfoMap.get(topicPartition);
         if (topicConsumerInfo != null) {
-            long cachedCount = topicConsumerInfo.getRecordCount();
+            long consumerCount = topicConsumerInfo.getRecordCount();
             long lastUpdateTime = topicConsumerInfo.getLastFlushTime();
             int commitMaxNum = configClient.getInteger(DZLOG_KAFKA_COMMIT_MAX_NUM);
             int commitMaxIntervalSeconds = configClient.getInteger(DZLOG_KAFKA_COMMIT_MAX_INTERVAL_SECONDS);
 
-            boolean rollBatchCommit = commitMaxNum > 0 && cachedCount >= commitMaxNum;
+            boolean rollBatchCommit = commitMaxNum > 0 && consumerCount >= commitMaxNum;
             long times = System.currentTimeMillis() - lastUpdateTime;
             boolean rollTimeCommit = commitMaxIntervalSeconds > 0 && times >= (commitMaxIntervalSeconds * 1000L);
 
             flush = rollBatchCommit || rollTimeCommit;
 
             if (flush) {
-                LOGGER.info("topicPartition: {}, commitMaxNum: {}, cachedCount: {}, lastUpdateTime: {}, commitMaxIntervalSeconds: {}, times: {}",
-                        commitMaxNum, cachedCount, lastUpdateTime, commitMaxIntervalSeconds, times);
+                LOGGER.info("topicPartition: {}, commitMaxNum: {}, consumerCount: {}, lastUpdateTime: {}, commitMaxIntervalSeconds: {}, times: {}",
+                        topicPartition, commitMaxNum, consumerCount, lastUpdateTime, commitMaxIntervalSeconds, times);
             }
         }
 
@@ -429,9 +432,5 @@ public class KafkaReceiveHandler implements Closeable {
 
     public Map<String, TopicConsumerInfo> getPartitionToTopicConsumerInfoMap() {
         return partitionToTopicConsumerInfoMap;
-    }
-
-    public void setPartitionToTopicConsumerInfoMap(Map<String, TopicConsumerInfo> partitionToTopicConsumerInfoMap) {
-        this.partitionToTopicConsumerInfoMap = partitionToTopicConsumerInfoMap;
     }
 }

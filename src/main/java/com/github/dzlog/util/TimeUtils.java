@@ -16,20 +16,19 @@ public class TimeUtils {
 
     private static DateTimeFormatter timestampFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private static final int unit = 15;
+    private static final int PARTTIION_UNIT = 15;
 
     public static String getCurrentDate() {
         LocalDateTime dateTime = LocalDateTime.now();
         LocalTime time = LocalTime.now();
-        int minute = time.getMinute() / unit * unit;
+        int minute = time.getMinute() / PARTTIION_UNIT * PARTTIION_UNIT;
         String index = minute == 0 ? "00" : Integer.toString(minute);
         String prefix = df.format(dateTime);
         return prefix + index;
     }
 
     public static String formatTimestamp(long timestamp) {
-        LocalDateTime dateTime =
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
                         TimeZone.getDefault().toZoneId());
         return timestampFormat.format(dateTime);
     }
