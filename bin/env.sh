@@ -19,5 +19,8 @@ export CLASSPATH=$BASE_DIR/doc:$BASE_DIR/conf:$BASE_DIR/lib/*
 
 #UEAP jvm args
 BASE_APP_ARGS=""
-BASE_JVM_ARGS="-Xmx4g -Xms4g -server"
+BASE_JVM_ARGS_0="-Xmx4g -Xms4g -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=512m -server"
+BASE_JVM_ARGS_1="-XX:ReservedCodeCacheSize=256m -XX:+UseCodeCacheFlushing -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled"
+BASE_JVM_ARGS_2="-XX:+UseParNewGC -XX:+UseFastAccessorMethods"
+BASE_JVM_ARGS_3="-XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
 APP_JVM_ARGS="$BASE_JVM_ARGS -cp $CLASSPATH"
