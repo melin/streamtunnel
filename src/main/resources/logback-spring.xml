@@ -6,7 +6,7 @@
     <logger name="org.apache.kafka" level="warn" />
     <logger name="org.springframework.kafka" level="warn" />
 
-    <springProfile name="dev,test">
+    <springProfile name="dev">
         <appender name="ConsoleLogAppender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>${CONSOLE_LOG_PATTERN}</pattern>
@@ -27,7 +27,7 @@
         </root>
     </springProfile>
 
-    <springProfile name="production">
+    <springProfile name="production,test">
         <property name="LOG_FILE" value="/home/admin/logs/dclog.log"/>
         <appender name="FileLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <encoder>
