@@ -6,6 +6,8 @@ import com.github.dzlog.support.ConfigurationLoader;
 import com.github.dzlog.util.HdfsUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,19 @@ public class HivePartitionService {
 
 	@Autowired
 	private ConfigurationLoader configurationLoader;
+
+	public boolean checkPartitionExists(LogCollectConfig collectConfig, String partitionSpec) {
+		try {
+			String basePath = "/user/hive/warehouse/" + collectConfig.getDatabaseName() + ".db/" + collectConfig.getTableName();
+			String partition = basePath + "/ds=" + partitionSpec;
+			Path partitionPath = new Path(partition);
+			FileSystem fileSystem = FileSystem.get(configurationLoader.getConfiguration());
+			return fileSystem.exists(partitionPath);
+		} catch (Exception e) {
+			LOGGER.warn("检测分区路径是否存在失败: {}", e.getMessage());
+			return false;
+		}
+	}
 
 	public void recordInfoToPartitionTable(LogCollectConfig collectConfig, String partitionSpec) {
 		try {
