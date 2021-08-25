@@ -10,6 +10,17 @@ dzlog不依赖spark/flink，是一个spring boot 应用，基于spring kafka 同
 3. 只写入原始数据，不做解析，用户单独跑ETL任务解析数据。
 4. 支持parquet、hudi 两种格式。
 
+## 打包运行
+
+```
+mvn clean package -Pproduction
+```
+target生成 dzlog-1.0-SNAPSHOT.tar.gz 部署包，解压包，执行脚本启动服务
+
+```
+./bin/server.sh start
+```
+
 ## 采集配置建表脚本
 ```sql
 CREATE TABLE dc_log_collect_config (
