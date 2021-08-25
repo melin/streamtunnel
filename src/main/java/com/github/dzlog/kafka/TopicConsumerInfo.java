@@ -12,6 +12,8 @@ import java.util.Set;
  */
 public class TopicConsumerInfo {
 
+	private String collectCode;
+
 	private String currentHivePartition;
 
 	private long recordCount = 0;
@@ -69,5 +71,13 @@ public class TopicConsumerInfo {
 
 	public void removeFileWriter(String code) {
 		fileWriterMap.remove(code);
+	}
+
+	public String getCollectCode() {
+		return collectCode;
+	}
+
+	public void setCollectCode(String collectCode) {
+		this.collectCode = collectCode;
 	}
 }

@@ -36,7 +36,7 @@ public class HivePartitionService {
 			String partition = basePath + "/ds=" + partitionSpec;
 
 			List<HivePartition> list = this.getPartitionEntity(collectConfig.getDatabaseName(),
-					collectConfig.getTableName(), "ds=" + partitionSpec);
+					collectConfig.getTableName(), partitionSpec);
 			if (list != null && list.size() > 0) {
 				LOGGER.info("分区信息已经存在： {}", partitionSpec);
 				return;
@@ -45,7 +45,7 @@ public class HivePartitionService {
 			Configuration configuration = configurationLoader.getConfiguration();
 			Triple<Long, Long, Long> tuple3 = HdfsUtils.getPartitionStatus(configuration, partition);
 			if (tuple3 != null) {
-				String defaultFS = configuration.get("fs.defaultFS", "hdfs://tdhdfs");
+				String defaultFS = configuration.get("fs.defaultFS", "hdfs://nameservice1");
 				Date date = new Date();
 				HivePartition hivePartition = new HivePartition();
 				hivePartition.setDataBaseName(collectConfig.getDatabaseName());

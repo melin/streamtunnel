@@ -303,6 +303,7 @@ public class KafkaReceiveHandler implements Closeable {
             if (!partitionToTopicConsumerInfoMap.containsKey(topicPartition)) {
                 TopicConsumerInfo topicConsumerInfo = new TopicConsumerInfo();
                 topicConsumerInfo.setCurrentHivePartition(currentHivePartition);
+                topicConsumerInfo.setCollectCode(code);
                 partitionToTopicConsumerInfoMap.put(topicPartition, topicConsumerInfo);
                 CODE_LOCK_MAP.putIfAbsent(code, new Object());
             }

@@ -23,8 +23,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.dzlog.DzlogConf.DZLOG_DATA_CENTER_KERBEROS_PRINCIPAL;
-import static com.github.dzlog.DzlogConf.DZLOG_DATA_CENTER_SPARK_JDBC_URLS;
+import static com.github.dzlog.DzlogConf.*;
 
 /**
  * Created by binsong.li on 2021/08/11.
@@ -95,17 +94,17 @@ public class HiveJdbcClient implements InitializingBean {
         Statement stmt = null;
         String url = getSparkJdbcUrl();
         try {
-            conn = DriverManager.getConnection(url, "dclog", "dclog");
+            conn = DriverManager.getConnection(url, "dzlog", "dzlog");
             stmt = conn.createStatement();
 
             StringBuilder sb = new StringBuilder("ALTER TABLE ");
-            sb.append(tableName).append(" ADD PARTITION (").append(partition).append(")");
+            sb.append(tableName).append(" ADD PARTITION (ds='").append(partition).append("')");
             stmt.execute(sb.toString());
 
             LOGGER.info("add partition {} for table {}", partition, tableName);
             return true;
         } catch (Exception e) {
-            LOGGER.error("hive url: " + url + ", add partition for table" + tableName , e);
+            LOGGER.warn("hive url: " + url + ", add partition for table" + tableName + ", " + e.getMessage());
             return false;
         } finally {
             JdbcUtils.closeConnection(conn);
@@ -126,7 +125,7 @@ public class HiveJdbcClient implements InitializingBean {
 
             return true;
         } catch (Exception e) {
-            LOGGER.error("repair table {} error: {}", tableName, e.getMessage());
+            LOGGER.warn("repair table {} error: {}", tableName, e.getMessage());
             return false;
         } finally {
             JdbcUtils.closeConnection(conn);
@@ -135,19 +134,18 @@ public class HiveJdbcClient implements InitializingBean {
     }
 
     private String getSparkJdbcUrl() {
+        if (availableHiveUrls.size() == 0) {
+            throw new RuntimeException("no available thriftserver");
+        }
         String hiveUrl = availableHiveUrls.get(new Random().nextInt(availableHiveUrls.size()));
         hiveUrl = getKerberosedUrl(hiveUrl);
 
-        if (StringUtils.isNotBlank(hiveUrl)) {
-            return "jdbc:hive2://" + hiveUrl;
-        } else {
-            throw new RuntimeException("no available thriftserver");
-        }
+        return "jdbc:hive2://" + hiveUrl;
     }
 
     public String getKerberosedUrl(String hiveUrl) {
         String authentication = configurationLoader.getConfiguration().get("hadoop.security.authentication");
-        String principal = configClient.getMapString(DZLOG_DATA_CENTER_KERBEROS_PRINCIPAL).get(dataCenter);
+        String principal = configClient.getMapString(DZLOG_DATA_CENTER_KERBEROS_HIVE_PRINCIPAL).get(dataCenter);
 
         if ("kerberos".equalsIgnoreCase(authentication)){
             if (principal.length() > 0) {

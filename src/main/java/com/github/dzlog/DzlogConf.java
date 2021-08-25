@@ -44,6 +44,12 @@ public class DzlogConf extends BeeConf {
             .mapStringConf()
             .createWithDefault(new MapStringValue("hangzhou", ""));
 
+    public static final ConfigEntry<MapStringValue> DZLOG_DATA_CENTER_KERBEROS_HIVE_PRINCIPAL = buildConf("dzlog.data.center.kerberos.hive.principal")
+            .doc("kerberos hive principal")
+            .version("3.0.0")
+            .mapStringConf()
+            .createWithDefault(new MapStringValue("hangzhou", ""));
+
     public static final ConfigEntry<MapStringValue> DZLOG_DATA_CENTER_SPARK_JDBC_URLS = buildConf("dzlog.data.center.spark.jdbc.urls")
             .doc("spark thrift server 地址，多个值逗号分隔")
             .version("3.0.0")

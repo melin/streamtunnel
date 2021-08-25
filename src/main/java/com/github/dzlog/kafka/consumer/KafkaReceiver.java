@@ -3,6 +3,7 @@ package com.github.dzlog.kafka.consumer;
 import com.gitee.bee.core.conf.BeeConfigClient;
 import com.github.dzlog.entity.LogCollectConfig;
 import com.github.dzlog.kafka.LogEvent;
+import com.github.dzlog.kafka.TopicConsumerInfo;
 import com.github.dzlog.service.HivePartitionService;
 import com.github.dzlog.service.LogCollectConfigService;
 import com.github.dzlog.support.HiveJdbcClient;
@@ -198,7 +199,7 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 		}
 
 		for (ConsumerRecord<Integer, ByteBuffer> record : list) {
-			String topicPartition = record.topic() + "-" + record.partition();
+			final String topicPartition = record.topic() + "-" + record.partition();
 
 			LogEvent logEvent = createLogEvent(record);
 			if (logEvent == null) {
@@ -207,22 +208,11 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 
 			LogCollectConfig collectConfig = dcLogCollectService.getDcLogByCode(logEvent.getCode());
 			if (collectConfig == null) {
-				LOGGER.error("can not get entity of logEvent {} ", logEvent.getCode());
+				LOGGER.error("采集不存在: {}", logEvent.getCode());
 				continue;
 			}
 
-			String lastHivePartition = topicPartitionLastHivePartition.get(topicPartition);
-			if (lastHivePartition == null) {
-				lastHivePartition = currentHivePartition;
-				topicPartitionLastHivePartition.put(topicPartition, currentHivePartition);
-
-				hivePartitionService.recordInfoToPartitionTable(collectConfig, "ds=" + currentHivePartition);
-			}
-			if (!lastHivePartition.equals(currentHivePartition)) {
-				String dbTableName = collectConfig.getDatabaseName() + "." + collectConfig.getTableName();
-				hiveJdbcClient.addPartition(dbTableName, lastHivePartition);
-				topicPartitionLastHivePartition.put(topicPartition, currentHivePartition);
-			}
+			changeHivePartition(collectConfig, topicPartition, currentHivePartition);
 
 			if (handler.appendEvent(logEvent, currentHivePartition)) {
 				handler.updateTopicPartition(logEvent);
@@ -285,8 +275,41 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 			return;
 		}
 
-		for (String topicPartition : receiverHandler.get().getPartitionToTopicConsumerInfoMap().keySet()) {
+		for (Map.Entry<String, TopicConsumerInfo> entry : receiverHandler.get().getPartitionToTopicConsumerInfoMap().entrySet()) {
+			String topicPartition = entry.getKey();
+			String currentHivePartition = TimeUtils.getCurrentHivePartition();
+
+			String collectCode = entry.getValue().getCollectCode();
+			LogCollectConfig collectConfig = dcLogCollectService.getDcLogByCode(collectCode);
+			if (collectConfig == null) {
+				LOGGER.error("采集不存在: {}", collectCode);
+			}
+			changeHivePartition(collectConfig, topicPartition, currentHivePartition);
+
 			receiverHandler.get().flushTopic("idle", topicPartition);
+		}
+	}
+
+	private void changeHivePartition(LogCollectConfig collectConfig, String topicPartition, String currentHivePartition) {
+		String lastHivePartition = topicPartitionLastHivePartition.get(topicPartition);
+		if (lastHivePartition == null) {
+			lastHivePartition = currentHivePartition;
+			topicPartitionLastHivePartition.put(topicPartition, currentHivePartition);
+		}
+
+		if (lastHivePartition != null && !lastHivePartition.equals(currentHivePartition)) {
+			topicPartitionLastHivePartition.put(topicPartition, currentHivePartition);
+			addPartitionInfo(collectConfig, topicPartition, lastHivePartition);
+		}
+	}
+
+	private void addPartitionInfo(LogCollectConfig collectConfig, String topicPartition, String lastHivePartition) {
+		String dbTableName = collectConfig.getDatabaseName() + "." + collectConfig.getTableName();
+
+		boolean result = hiveJdbcClient.addPartition(dbTableName, lastHivePartition);
+		if (result) {
+			// 如果没有dc_table_partition 表，可以注释下面一行
+			hivePartitionService.recordInfoToPartitionTable(collectConfig, lastHivePartition);
 		}
 	}
 }
