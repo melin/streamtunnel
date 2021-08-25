@@ -1,14 +1,20 @@
 package com.github.dzlog.util;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.parquet.hadoop.Footer;
+import org.apache.parquet.hadoop.ParquetFileReader;
+import org.apache.parquet.hadoop.metadata.BlockMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -105,6 +111,46 @@ public class HdfsUtils {
 		} catch (Exception e) {
 			LOGGER.error("get partition {} error {}", dir, e.getMessage());
 			return false;
+		}
+	}
+
+	public static Triple<Long, Long, Long> getPartitionStatus(Configuration configuration, String dir) {
+		try {
+			Path dirPath = new Path(dir);
+			FileSystem fs = dirPath.getFileSystem(configuration);
+			if (!fs.exists(dirPath)) {
+				return null;
+			}
+
+			long fileSize = 0L, numRows = 0L;
+			FileStatus[] fileStatuses = fs.listStatus(dirPath, path -> {
+				try {
+					return fs.isFile(path) && !path.getName().startsWith(".");
+				} catch (Exception e) {
+					return false;
+				}
+			});
+			long fileCount = fileStatuses.length;
+			for (FileStatus status : fileStatuses) {
+				fileSize += status.getLen();
+			}
+
+			List<FileStatus> fileStatusList = Arrays.asList(fileStatuses);
+
+			List<Footer> footers = ParquetFileReader.readAllFootersInParallel(configuration,
+					fileStatusList, false);
+
+			for (Footer f : footers) {
+				List<BlockMetaData> blockMetaDataList = f.getParquetMetadata().getBlocks();
+				for (BlockMetaData b : blockMetaDataList) {
+					numRows += b.getRowCount();
+				}
+			}
+
+			return Triple.of(fileCount, fileSize, numRows);
+		} catch (Exception e) {
+			LOGGER.error("get partition {} status error: {}", dir, e.getMessage());
+			return null;
 		}
 	}
 }

@@ -17,7 +17,6 @@ import org.springframework.util.Assert;
 
 import java.io.IOException;
 
-import static com.github.dzlog.DzlogConf.DZLOG_DATA_CENTER_KERBEROS_KEYTAB_PATH;
 import static com.github.dzlog.DzlogConf.DZLOG_DATA_CENTER_KERBEROS_PRINCIPAL;
 
 /**
@@ -89,10 +88,6 @@ public class ConfigurationLoader implements InitializingBean {
 		} catch (Throwable e) {
 			throw new RuntimeException("加载hadoop、 hive配置文件失败: " + configPath, e);
 		}
-	}
-
-	public String getDefaultFS() {
-		return configuration.get("fs.defaultFS");
 	}
 
 	public Configuration getConfiguration() {

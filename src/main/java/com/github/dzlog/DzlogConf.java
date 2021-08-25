@@ -1,7 +1,6 @@
 package com.github.dzlog;
 
 import com.gitee.bee.core.conf.*;
-import com.google.common.collect.Sets;
 
 /**
  * @author melin
@@ -45,8 +44,8 @@ public class DzlogConf extends BeeConf {
             .mapStringConf()
             .createWithDefault(new MapStringValue("hangzhou", ""));
 
-    public static final ConfigEntry<MapStringValue> DZLOG_DATA_CENTER_KERBEROS_KEYTAB_PATH = buildConf("dzlog.data.center.kerberos.keytab.path")
-            .doc("kerberos keytab path")
+    public static final ConfigEntry<MapStringValue> DZLOG_DATA_CENTER_SPARK_JDBC_URLS = buildConf("dzlog.data.center.spark.jdbc.urls")
+            .doc("spark thrift server 地址，多个值逗号分隔")
             .version("3.0.0")
             .mapStringConf()
             .createWithDefault(new MapStringValue("hangzhou", ""));

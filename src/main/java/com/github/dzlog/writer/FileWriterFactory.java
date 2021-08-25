@@ -48,7 +48,7 @@ public class FileWriterFactory implements InitializingBean {
                                                        String hivePartition) throws IOException {
         long threadId = Thread.currentThread().getId();
 
-        LogCollectConfig collect = collectConfigService.getDcLogPathByCode(code);
+        LogCollectConfig collect = collectConfigService.getDcLogByCode(code);
         if (collect == null) {
             throw new RuntimeException("can not get entity about topic: " + code);
         }

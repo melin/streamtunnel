@@ -109,7 +109,7 @@ public class LogCollectConfigService implements InitializingBean {
 		return entity;
 	};
 
-	public LogCollectConfig getDcLogPathByCode(String code) {
+	public LogCollectConfig getDcLogByCode(String code) {
 		try {
 			return codeCache.getUnchecked(code);
 		} catch (CacheLoader.InvalidCacheLoadException e) {

@@ -1,8 +1,11 @@
 package com.github.dzlog.kafka.consumer;
 
 import com.gitee.bee.core.conf.BeeConfigClient;
+import com.github.dzlog.entity.LogCollectConfig;
 import com.github.dzlog.kafka.LogEvent;
+import com.github.dzlog.service.HivePartitionService;
 import com.github.dzlog.service.LogCollectConfigService;
+import com.github.dzlog.support.HiveJdbcClient;
 import com.github.dzlog.util.ThreadUtils;
 import com.github.dzlog.util.TimeUtils;
 import com.google.common.util.concurrent.RateLimiter;
@@ -28,6 +31,7 @@ import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.stereotype.Service;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,6 +57,12 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 	@Autowired
 	private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
+	@Autowired
+	private HiveJdbcClient hiveJdbcClient;
+
+	@Autowired
+	private HivePartitionService hivePartitionService;
+
 	private ApplicationContext applicationContext;
 
 	private volatile RateLimiter rateLimiter = null;
@@ -65,6 +75,11 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 	private ThreadLocal<KafkaReceiveHandler> receiverHandler = new ThreadLocal<>();
 
 	protected Map<Long, KafkaReceiveHandler> threadToHandlerMap = new ConcurrentHashMap<>();
+
+	/**
+	 * topic 分区对应上一个 hive 分区值
+	 */
+	protected Map<String, String> topicPartitionLastHivePartition = new ConcurrentHashMap<>();
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -172,7 +187,7 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 			handler.setConsumer(consumer);
 		}
 
-		String currentHivePartition = TimeUtils.getCurrentDate();
+		String currentHivePartition = TimeUtils.getCurrentHivePartition();
         //到达新的分区
 		if (!StringUtils.equals(currentHivePartition, handler.getCurrentPartition())) {
 			for (String partitionName : handler.getPartitionToTopicConsumerInfoMap().keySet()) {
@@ -180,19 +195,35 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 			}
 
 			handler.setCurrentPartition(currentHivePartition);
-			LOGGER.info("thread {} reduceCount", Thread.currentThread().getId());
 		}
 
 		for (ConsumerRecord<Integer, ByteBuffer> record : list) {
+			String topicPartition = record.topic() + "-" + record.partition();
+
 			LogEvent logEvent = createLogEvent(record);
 			if (logEvent == null) {
 				continue;
-			} else if (dcLogCollectService.getDcLogPathByCode(logEvent.getCode()) == null) {
-				LOGGER.error("can not get entity of logEvent {} ", logEvent);
+			}
+
+			LogCollectConfig collectConfig = dcLogCollectService.getDcLogByCode(logEvent.getCode());
+			if (collectConfig == null) {
+				LOGGER.error("can not get entity of logEvent {} ", logEvent.getCode());
 				continue;
 			}
 
-			String topicPartition = logEvent.getTopicPartition();
+			String lastHivePartition = topicPartitionLastHivePartition.get(topicPartition);
+			if (lastHivePartition == null) {
+				lastHivePartition = currentHivePartition;
+				topicPartitionLastHivePartition.put(topicPartition, currentHivePartition);
+
+				hivePartitionService.recordInfoToPartitionTable(collectConfig, "ds=" + currentHivePartition);
+			}
+			if (!lastHivePartition.equals(currentHivePartition)) {
+				String dbTableName = collectConfig.getDatabaseName() + "." + collectConfig.getTableName();
+				hiveJdbcClient.addPartition(dbTableName, lastHivePartition);
+				topicPartitionLastHivePartition.put(topicPartition, currentHivePartition);
+			}
+
 			if (handler.appendEvent(logEvent, currentHivePartition)) {
 				handler.updateTopicPartition(logEvent);
 				if (handler.checkTopicForCommit(topicPartition)) {
@@ -212,27 +243,35 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 	@Override
 	public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekCallback consumerSeekCallback) {
 		KafkaReceiveHandler handler = receiverHandler.get();
+		long threadId = Thread.currentThread().getId();
 		if (handler != null) {
 			IOUtils.closeQuietly(handler);
-		} else if (assignments.isEmpty()) {
-			//一直没有分配有效partition
-			return;
+			receiverHandler.remove();
+			threadToHandlerMap.remove(threadId);
 		}
 
-		long threadId = Thread.currentThread().getId();
 		if (!assignments.isEmpty()) {
-			TROUBLE_LOGGER.info("thread {} assigned for topic partition {}", threadId, assignments);
+			TROUBLE_LOGGER.info("thread {} assigned for topic partition {}",
+					threadId, StringUtils.join(assignments.keySet(), ","));
 
 			handler = new KafkaReceiveHandler(consumerSeekCallback, applicationContext);
-			handler.setCurrentPartition(TimeUtils.getCurrentDate());
+			String currentHivePartition = TimeUtils.getCurrentHivePartition();
+			handler.setCurrentPartition(currentHivePartition);
 
 			handler.initAssignment(assignments);
 			receiverHandler.set(handler);
 			threadToHandlerMap.putIfAbsent(threadId, handler);
-		} else {
-			receiverHandler.remove();
-			threadToHandlerMap.remove(threadId);
+
+			assignments.entrySet().forEach(topicPartition ->
+					topicPartitionLastHivePartition.put(topicPartition.toString(), currentHivePartition));
 		}
+	}
+
+	@Override
+	public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+		long threadId = Thread.currentThread().getId();
+		TROUBLE_LOGGER.info("thread {} revoked assigned for topic partition {}",
+				threadId, StringUtils.join(partitions, ","));
 	}
 
 	/**
@@ -246,18 +285,8 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 			return;
 		}
 
-		String currentPartition = TimeUtils.getCurrentDate();
-		Boolean mergeFile = false;
-		if (!StringUtils.equals(currentPartition, receiverHandler.get().getCurrentPartition())) {
-			mergeFile = true;
-		}
 		for (String topicPartition : receiverHandler.get().getPartitionToTopicConsumerInfoMap().keySet()) {
 			receiverHandler.get().flushTopic("idle", topicPartition);
-		}
-		if (mergeFile) {
-			receiverHandler.get().setCurrentPartition(currentPartition);
-			//dcLogMergeService.reduceCount();
-			LOGGER.info("thread {} reduceCount", Thread.currentThread().getId());
 		}
 	}
 }

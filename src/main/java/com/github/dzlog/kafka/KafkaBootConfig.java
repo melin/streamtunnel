@@ -88,7 +88,6 @@ public class KafkaBootConfig implements InitializingBean {
 	private ConcurrentKafkaListenerContainerFactory<String, ByteBuffer> buildContainerFactory(
 			KafkaReceiver receiver, LogCollectConfigService collectConfigService) {
 
-	    List<String> topics = collectConfigService.queryAllTopics();
 		DzConcurrentKafkaListenerContainerFactory<String, ByteBuffer> factory = new DzConcurrentKafkaListenerContainerFactory();
 
 		Map<String, String> map = configClient.getMapString(DZLOG_DATA_CENTER_KAFKA_BROKERS);

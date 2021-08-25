@@ -18,7 +18,11 @@ public class TimeUtils {
 
     private static final int PARTTIION_UNIT = 15;
 
-    public static String getCurrentDate() {
+    /**
+     * 当前分区值：yyyyMMddHHmm
+     * @return
+     */
+    public static String getCurrentHivePartition() {
         LocalDateTime dateTime = LocalDateTime.now();
         LocalTime time = LocalTime.now();
         int minute = time.getMinute() / PARTTIION_UNIT * PARTTIION_UNIT;
