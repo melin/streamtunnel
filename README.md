@@ -15,6 +15,8 @@ dzlog不依赖spark/flink，是一个spring boot 应用，基于spring kafka 同
 
 ## 打包运行
 
+依赖bee 中BeeConfigClient 类，可以二次开发去掉依赖: https://gitee.com/melin/bee
+
 ```
 mvn clean package -Pproduction
 ```
@@ -62,4 +64,18 @@ CREATE TABLE `dc_dc_log_collect_metric` (
     PRIMARY KEY (`id`),
     KEY `idx_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='采集服务器信息';
+
+CREATE TABLE `dc_config` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+     `appname` varchar(64) NOT NULL,
+     `profile` varchar(64) NOT NULL,
+     `config_text` longtext,
+     `version` int(11) DEFAULT '0' COMMENT 'version',
+     `creater` varchar(45) NOT NULL,
+     `modifier` varchar(45) DEFAULT NULL,
+     `gmt_created` datetime NOT NULL,
+     `gmt_modified` datetime DEFAULT NULL,
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `appname_UNIQUE` (`appname`,`profile`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统参数配置';
 ```
