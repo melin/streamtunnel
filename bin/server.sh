@@ -137,7 +137,7 @@ function print_log() {
 
     echo "profile: $profile"
     if [ $profile == "production" ] || [ $profile == "test" ]; then
-        tail -200f ~/output/datawork/logs/datawork.log
+        tail -200f ~/output/dzlog/logs/dzlog.log
     elif [ $profile == "dev" ]; then
         tail -f $LOG_FILE
     else
