@@ -1,8 +1,8 @@
 ## 数据采集平台
-从kafka 中消费数据写入hive表中，一般很容想到用spark，flink消费数据写入hive表中。业务需要申请kafka topic，再写spark/flink 任务，把数据写入hive 表，需要依赖spark/flink，方案很重。如果需要采集应用日志很多，启动的spark/flink任务相应也很多
+从kafka 中消费数据写入hive表中，一般第一想到就是用spark，flink消费数据写入hive表中，一般规模场景下，方案很重。如果需要采集应用日志很多，启动的spark/flink任务相应也很多，
 
-dzlog不依赖spark/flink，是一个spring boot 应用，基于spring kafka 同时消费多个topic并发消费数据，每一个topic消费数据先在本地生成parquet文件，按照最大数量或者时间定时上传到表分区目录中。
-这样可以平台化实现数据采集能力，基于dc_log_collect_config 表开发一个管理页面。
+dzlog不依赖spark/flink，是一个spring boot 应用，基于spring kafka 同时消费多个topic并发消费数据，无中心节点，可以随时启动一个新节点，满足消费速度，每一个topic消费数据先在本地生成parquet文件，按照最大数量或者时间定时上传到表分区目录中。
+可以平台化实现数据采集能力，基于dc_log_collect_config 表开发一个管理页面。
 
 现在依赖用户主动把数据写入kafka，可以和filebeat结合，打通采集流程，用户只需要使用logger把数据写入日志文件，通过filebeat采集数据写入kafka，上家公司就是这么实现的，需要配套完整基建落地，只需要通过表单填写应用名称、采集路径、采集频率等信息，审批通过后自动通知下发给应用所有的服务器采集数据。
 
