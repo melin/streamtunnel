@@ -28,7 +28,7 @@
     </springProfile>
 
     <springProfile name="production,test">
-        <property name="LOG_FILE" value="/home/admin/logs/dclog.log"/>
+        <property name="LOG_FILE" value="${user.home}/logs/dclog.log"/>
         <appender name="FileLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <encoder>
                 <pattern>${FILE_LOG_PATTERN}</pattern>
@@ -44,7 +44,7 @@
             </triggeringPolicy>
         </appender>
 
-        <property name="TROUBLE_LOG_FILE" value="/home/admin/logs/errlog.log"/>
+        <property name="TROUBLE_LOG_FILE" value="${user.home}/logs/errlog.log"/>
         <appender name="TroubleLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <encoder>
                 <pattern>${FILE_LOG_PATTERN}</pattern>
