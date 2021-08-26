@@ -8,7 +8,8 @@ dzlog不依赖spark/flink，是一个spring boot 应用，基于spring kafka 同
 1. 每十五分钟一个分区(00, 15, 30, 45)，按照消息接收时间作为区分。
 2. 当前写入分区，对用户不可见，切换到下个分区执行: ALTER TABLE ADD PARTITION
 3. 只写入原始数据，不做解析，用户单独跑ETL任务解析数据。
-4. 支持parquet、hudi 两种格式。
+4. 支持parquet、hudi(待开发) 两种格式。
+5. 依赖redis 选举leader，主要用于监控线程，非主流程必要功能。
 
 ## 打包运行
 
