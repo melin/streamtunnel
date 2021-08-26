@@ -25,12 +25,16 @@ public class HivePartitionMonitor {
     @Autowired
     private HivePartitionService hivePartitionService;
 
+    @Autowired
+    private LeaderElection leaderElection;
+
     @Scheduled(cron = "0 */15 * * * ?")
     public void repairHivePartition() {
         LOGGER.info("repair hive partition ...");
 
-        //@TODO 增加leader 选举
-        repairHivePartitionTask();
+        if (leaderElection.isMaster()) {
+            repairHivePartitionTask();
+        }
     }
 
     private void repairHivePartitionTask() {

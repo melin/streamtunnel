@@ -8,7 +8,9 @@ import com.gitee.bee.core.enums.mvc.IntegerToEnumConverterFactory;
 import com.gitee.bee.core.enums.mvc.StringToEnumConverterFactory;
 import com.github.dzlog.DzlogConf;
 import org.apache.commons.lang3.ArrayUtils;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -42,6 +44,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Autowired
     private Environment environment;
+
+    @Value("${spring.application.name}")
+    private String appName;
 
     @Primary //默认数据源
     @Bean(name = "dataSource", destroyMethod = "close")
@@ -122,4 +127,11 @@ public class WebConfig implements WebMvcConfigurer {
         return configClient;
     }
 
+    @Bean(destroyMethod = "shutdown")
+    public LeaderElection leaderElection(RedissonClient redissonClient) {
+        LeaderElection leaderElection = new LeaderElection();
+        leaderElection.setRedissonClient(redissonClient);
+        leaderElection.tryHold("leader-lock-" + appName);
+        return leaderElection;
+    }
 }
