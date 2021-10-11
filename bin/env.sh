@@ -13,7 +13,7 @@ JAVA=$JAVA_HOME/bin/java
 BASE_HOME=$BASE_DIR
 SERVER_NAME="datainsight"
 APP_START_MAIN_CLASS="com.github.dzlog.DzlogAppMain"
-APP_STOP_MAIN_CLASS="com.dataworker.web.support.jmx.StopServerTool"
+APP_STOP_MAIN_CLASS="com.github.dzlog.support.jmx.StopServerTool"
 
 export CLASSPATH=$BASE_DIR/doc:$BASE_DIR/conf:$BASE_DIR/lib/*
 

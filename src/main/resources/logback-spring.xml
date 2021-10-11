@@ -29,6 +29,8 @@
 
     <springProfile name="production,test">
         <property name="LOG_FILE" value="${user.home}/output/dzlog/logs/dzlog.log"/>
+        <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss SSS} %p:%C %m%n" />
+
         <appender name="FileLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <encoder>
                 <pattern>${FILE_LOG_PATTERN}</pattern>
