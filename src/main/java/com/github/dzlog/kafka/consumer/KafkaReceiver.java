@@ -255,9 +255,11 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 
 	@Override
 	public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-		long threadId = Thread.currentThread().getId();
-		TROUBLE_LOGGER.info("thread {} revoked assigned for topic partition {}",
-				threadId, StringUtils.join(partitions, ","));
+		if (!partitions.isEmpty()) {
+			long threadId = Thread.currentThread().getId();
+			TROUBLE_LOGGER.info("thread {} revoked assigned for topic partition {}",
+					threadId, StringUtils.join(partitions, ","));
+		}
 	}
 
 	/**
