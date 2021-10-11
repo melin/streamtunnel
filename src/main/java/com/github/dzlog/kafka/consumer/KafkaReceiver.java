@@ -6,7 +6,6 @@ import com.github.dzlog.kafka.LogEvent;
 import com.github.dzlog.kafka.TopicConsumerInfo;
 import com.github.dzlog.service.HivePartitionService;
 import com.github.dzlog.service.LogCollectConfigService;
-import com.github.dzlog.support.HiveJdbcClient;
 import com.github.dzlog.util.ThreadUtils;
 import com.github.dzlog.util.TimeUtils;
 import com.google.common.util.concurrent.RateLimiter;
@@ -57,9 +56,6 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 
 	@Autowired
 	private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
-
-	@Autowired
-	private HiveJdbcClient hiveJdbcClient;
 
 	@Autowired
 	private HivePartitionService hivePartitionService;
