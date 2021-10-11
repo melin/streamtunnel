@@ -2,7 +2,6 @@ package com.github.dzlog.kafka;
 
 import com.gitee.bee.core.conf.BeeConfigClient;
 import com.github.dzlog.kafka.consumer.KafkaReceiver;
-import com.github.dzlog.service.LogCollectConfigService;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.ByteBufferDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -45,9 +44,6 @@ public class KafkaBootConfig implements InitializingBean {
 	@Autowired
 	private BeeConfigClient configClient;
 
-    @Autowired
-	private LogCollectConfigService collectConfigService;
-
 	@Value("${dzlog.datacenter}")
     private String dataCenter;
 
@@ -61,7 +57,7 @@ public class KafkaBootConfig implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Map<String, String> map = configClient.getMapString(DZLOG_DATA_CENTER_KAFKA_AUTO_OFFSET_RESET);
-		String kafkaAutoOffsetReset = map.getOrDefault(dataCenter, "latest");
+		kafkaAutoOffsetReset = map.getOrDefault(dataCenter, "latest");
 
 		if (!("earliest".equals(kafkaAutoOffsetReset) || "latest".equals(kafkaAutoOffsetReset))) {
 			kafkaAutoOffsetReset = KAFKA_AUTO_OFFSET_RESET;
@@ -84,8 +80,7 @@ public class KafkaBootConfig implements InitializingBean {
 		return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new ByteBufferDeserializer());
 	}
 
-	private ConcurrentKafkaListenerContainerFactory<String, ByteBuffer> buildContainerFactory(
-			KafkaReceiver receiver, LogCollectConfigService collectConfigService) {
+	private ConcurrentKafkaListenerContainerFactory<String, ByteBuffer> buildContainerFactory(KafkaReceiver receiver) {
 
 		DzConcurrentKafkaListenerContainerFactory<String, ByteBuffer> factory = new DzConcurrentKafkaListenerContainerFactory();
 
@@ -105,9 +100,8 @@ public class KafkaBootConfig implements InitializingBean {
 	}
 
 	@Bean("kafkaListenerContainerFactory")
-	public ConcurrentKafkaListenerContainerFactory<String, ByteBuffer> kafkaListenerContainerFactory(
-			KafkaReceiver receiver, LogCollectConfigService collectConfigService) {
-		return buildContainerFactory(receiver, collectConfigService);
+	public ConcurrentKafkaListenerContainerFactory<String, ByteBuffer> kafkaListenerContainerFactory(KafkaReceiver receiver) {
+		return buildContainerFactory(receiver);
 	}
 
 	private static class DzConcurrentKafkaListenerContainerFactory<K, V> extends ConcurrentKafkaListenerContainerFactory {
