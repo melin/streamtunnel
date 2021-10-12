@@ -48,8 +48,8 @@ public class ConfigurationLoader implements InitializingBean {
 		String configPath = "";
 		try {
 			String profile = "dev";
-			if (ArrayUtils.contains(environment.getActiveProfiles(), "prod")) {
-				profile = "prod";
+			if (ArrayUtils.contains(environment.getActiveProfiles(), "production")) {
+				profile = "production";
 			} else if (ArrayUtils.contains(environment.getActiveProfiles(), "test")) {
 				profile = "test";
 			}
