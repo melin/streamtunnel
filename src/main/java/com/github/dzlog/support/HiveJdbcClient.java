@@ -58,7 +58,7 @@ public class HiveJdbcClient implements InitializingBean {
             while (true) {
                 try {
                     String sourceHiveUrls = configClient.getMapString(DZLOG_DATA_CENTER_SPARK_JDBC_URLS).get(dataCenter);
-                    String[] newHiveUrls = StringUtils.split(sourceHiveUrls, ";");
+                    String[] newHiveUrls = StringUtils.split(sourceHiveUrls, ",");
                     for (String hiveUrl : newHiveUrls) {
                         boolean alive = NetUtils.isRunning(hiveUrl);
                         if (!alive && availableHiveUrls.contains(hiveUrl)) {

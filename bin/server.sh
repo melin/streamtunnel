@@ -109,24 +109,22 @@ function stop_server() {
     fi
     count=0
     pid=$(cat $PID_FILE)
-    jmx_port=$(cat $JMX_PORT_FILE)
-    echo "jmx port $jmx_port"
+
+    kill $pid
 
     while running;
     do
         let count=$count+1
-        # echo "Stopping $SERVER_NAME $count times"
-        if [ $count -gt 3 ]; then
-            echo "kill -9 $pid"
+        if [ $count -gt 20 ]; then
+            echo "进程停止超时 $pid ,强制终止"
             kill -9 $pid
         else
-            sleep 1
-            $JAVA $APP_JVM_ARGS -DBASE_HOME=$BASE_HOME -Dhost=127.0.0.1 -Dport=$jmx_port $APP_STOP_MAIN_CLASS $@
+            echo "$SERVER_NAME stopping..."
         fi
-        sleep 3;
+        sleep 1
     done
 
-    # echo "Stop $SERVER_NAME successfully."
+    echo "$SERVER_NAME stopped successfully."
     rm $PID_FILE
 }
 
