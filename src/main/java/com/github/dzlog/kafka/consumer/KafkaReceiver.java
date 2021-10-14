@@ -157,8 +157,7 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 
 			LogEvent logEvent = new LogEvent();
 
-			String receivedTime = TimeUtils.formatTimestamp(record.timestamp());
-			logEvent.setReceivedTime(receivedTime);
+			logEvent.setReceivedTime(record.timestamp());
 
 			ByteBuffer byteBuffer = record.value();
 			byteBuffer.position(0);

@@ -11,7 +11,7 @@ fi
 
 JAVA=$JAVA_HOME/bin/java
 BASE_HOME=$BASE_DIR
-SERVER_NAME="datainsight"
+SERVER_NAME="dzlog"
 APP_START_MAIN_CLASS="com.github.dzlog.DzlogAppMain"
 
 export CLASSPATH=$BASE_DIR/doc:$BASE_DIR/conf:$BASE_DIR/lib/*

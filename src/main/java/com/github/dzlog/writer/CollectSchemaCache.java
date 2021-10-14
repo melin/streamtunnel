@@ -9,9 +9,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.parquet.example.data.simple.SimpleGroupFactory;
 import org.apache.parquet.hadoop.example.GroupWriteSupport;
 import org.apache.parquet.schema.MessageType;
-import org.apache.parquet.schema.OriginalType;
 import org.apache.parquet.schema.PrimitiveType;
-import org.apache.parquet.schema.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -21,6 +19,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.BINARY;
+import static org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.INT96;
+import static org.apache.parquet.schema.Type.Repetition.OPTIONAL;
+
 /**
  * Created by libinsong on 2019/5/16
  */
@@ -29,10 +31,9 @@ public class CollectSchemaCache implements InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectSchemaCache.class);
 
-    private static final MessageType DCLOG_SCHEMA = Types.buildMessage()
-            .required(PrimitiveType.PrimitiveTypeName.BINARY).as(OriginalType.UTF8).named("message")
-            .required(PrimitiveType.PrimitiveTypeName.BINARY).as(OriginalType.UTF8).named("collect_time")
-            .named("dzlog");
+    private static final MessageType DCLOG_SCHEMA = new MessageType("dzlog",
+            new PrimitiveType(OPTIONAL, BINARY, "message"),
+            new PrimitiveType(OPTIONAL, INT96, "collect_time"));
 
     @Autowired
     private LogCollectConfigService collectConfigService;
@@ -94,10 +95,6 @@ public class CollectSchemaCache implements InitializingBean {
 
     public SimpleGroupFactory getGroupFactory(String collectCode) {
         return groupFactoryCache.get(collectCode);
-    }
-
-    public MessageType getSchemaCache(String collectCode) {
-        return schemaCache.get(collectCode);
     }
 
     public Configuration getConfiguration(String collectCode) {

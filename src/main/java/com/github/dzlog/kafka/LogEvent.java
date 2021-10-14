@@ -14,7 +14,7 @@ public class LogEvent {
 
     private String code;
 
-    private String receivedTime;
+    private Long receivedTime;
 
     private ByteBuffer msgByteBuffer;
 
@@ -56,11 +56,11 @@ public class LogEvent {
         this.code = code;
     }
 
-    public String getReceivedTime() {
+    public Long getReceivedTime() {
         return receivedTime;
     }
 
-    public void setReceivedTime(String receivedTime) {
+    public void setReceivedTime(Long receivedTime) {
         this.receivedTime = receivedTime;
     }
 
