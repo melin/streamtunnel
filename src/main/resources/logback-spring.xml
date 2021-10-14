@@ -5,6 +5,7 @@
     <property name="FILE_LOG_EXT_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%file : %line] --- %m%n"/>
     <logger name="org.apache.kafka" level="warn" />
     <logger name="org.springframework.kafka" level="warn" />
+    <logger name="org.apache.hive.jdbc.Utils" level="warn" />
 
     <springProfile name="dev">
         <appender name="ConsoleLogAppender" class="ch.qos.logback.core.ConsoleAppender">
