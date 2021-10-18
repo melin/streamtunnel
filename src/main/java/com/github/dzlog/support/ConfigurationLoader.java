@@ -67,6 +67,7 @@ public class ConfigurationLoader implements InitializingBean {
 
             if ("kerberos".equalsIgnoreCase(authentication)) {
 				Assert.hasText(principal, "启动kerberos，principal 不能为空");
+				LOGGER.info("kerberos 认证");
 				ClassPathResource keytabFile = new ClassPathResource(configPath + "dzlog.keytab");
 				if (!keytabFile.exists()) {
 					throw new IllegalArgumentException("启动kerberos，keytab文件不存在: dzlog.keytab");

@@ -135,4 +135,47 @@
         <name>dfs.nfs.kerberos.principal</name>
         <value>hdfs/_HOST@EXAMPLE.COM</value>
     </property>
+
+    <!-- 添加配置 -->
+    <property>
+        <name>fs.hdfs.impl.disable.cache</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>dfs.image.transfer.timeout</name>
+        <value>1200000</value>
+    </property>
+
+    <property>
+        <name>parquet.metadata.read.parallelism</name>
+        <value>4</value>
+    </property>
+    <property>
+        <name>parquet.compression</name>
+        <value>SNAPPY</value>
+    </property>
+
+    <property>
+        <name>io.file.buffer.size</name>
+        <value>65536</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.authentication</name>
+        <value>kerberos</value>
+    </property>
+    <property>
+        <name>hadoop.security.authorization</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hadoop.rpc.protection</name>
+        <value>authentication</value>
+    </property>
+
+    <!-- hive config -->
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/user/hive/warehouse/</value>
+    </property>
 </configuration>
