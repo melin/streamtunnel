@@ -81,3 +81,6 @@ CREATE TABLE `dc_config` (
      UNIQUE KEY `appname_UNIQUE` (`appname`,`profile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统参数配置';
 ```
+
+####资料
+1. [Kafka 生产环境部署指南](https://xie.infoq.cn/article/d57f83779490c7ff62b6b59ae)
