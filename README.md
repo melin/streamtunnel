@@ -6,8 +6,6 @@ dzlog不依赖spark/flink，是一个spring boot 应用，基于spring kafka 同
 
 现在依赖用户主动把数据写入kafka，可以和filebeat结合，打通采集流程，用户只需要使用logger把数据写入日志文件，通过filebeat采集数据写入kafka，上家公司就是这么实现的，需要配套完整基建落地，只需要通过表单填写应用名称、采集路径、采集频率等信息，审批通过后自动通知下发给应用所有的服务器采集数据。
 
-![供参考实例](dev/image.png)
-
 ## dzlog 规则
 1. 每十五分钟一个分区(00, 15, 30, 45)，按照消息接收时间写入对应分区。
 2. 当前写入分区，对用户不可见，切换到下个分区执行: ALTER TABLE ADD PARTITION
