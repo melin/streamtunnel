@@ -3,61 +3,54 @@
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://nameservice1</value>
+        <value>hdfs://engine01:8020</value>
     </property>
 
+    <!--  指定命名空间  -->
     <property>
         <name>dfs.nameservices</name>
-        <value>nameservice1</value>
+        <value>engine01</value>
+    </property>
+    <!--  指定该命名空间下的两个机器作为我们的NameNode  -->
+    <property>
+        <name>dfs.ha.namenodes.engine01</name>
+        <value>nn1,nn2</value>
     </property>
     <property>
-        <name>dfs.client.failover.proxy.provider.nameservice1</name>
-        <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+        <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+        <value>false</value>
     </property>
+    <!-- 配置第一台服务器的namenode通信地址  -->
     <property>
-        <name>dfs.ha.automatic-failover.enabled.nameservice1</name>
-        <value>true</value>
+        <name>dfs.namenode.rpc-address.engine01.nn1</name>
+        <value>node1.hadoop02.aloudata.work:8020</value>
     </property>
+    <!--  配置第二台服务器的namenode通信地址  -->
     <property>
-        <name>ha.zookeeper.quorum</name>
-        <value>hadoop-test-dn1-9-13:2181,hadoop-test-nn1-9-11:2181,hadoop-test-nn2-9-12:2181</value>
+        <name>dfs.namenode.rpc-address.engine01.nn2</name>
+        <value>node2.hadoop02.aloudata.work:8020</value>
     </property>
+    <!-- 所有从节点之间相互通信端口地址 -->
     <property>
-        <name>dfs.ha.namenodes.nameservice1</name>
-        <value>namenode230,namenode244</value>
+        <name>dfs.namenode.servicerpc-address.engine01.nn1</name>
+        <value>node1.hadoop02.aloudata.work:8022</value>
     </property>
+    <!-- 所有从节点之间相互通信端口地址 -->
     <property>
-        <name>dfs.namenode.rpc-address.nameservice1.namenode230</name>
-        <value>hadoop-test-nn1-9-11:8020</value>
+        <name>dfs.namenode.servicerpc-address.engine01.nn2</name>
+        <value>node2.hadoop02.aloudata.work:8022</value>
     </property>
+    <!-- 第一台服务器namenode的web访问地址  -->
     <property>
-        <name>dfs.namenode.servicerpc-address.nameservice1.namenode230</name>
-        <value>hadoop-test-nn1-9-11:8022</value>
+        <name>dfs.namenode.http-address.engine01.nn1</name>
+        <value>node1.hadoop02.aloudata.work:50070</value>
     </property>
+    <!-- 第二台服务器namenode的web访问地址  -->
     <property>
-        <name>dfs.namenode.http-address.nameservice1.namenode230</name>
-        <value>hadoop-test-nn1-9-11:50070</value>
+        <name>dfs.namenode.http-address.engine01.nn2</name>
+        <value>node2.hadoop02.aloudata.work:50070</value>
     </property>
-    <property>
-        <name>dfs.namenode.https-address.nameservice1.namenode230</name>
-        <value>hadoop-test-nn1-9-11:50470</value>
-    </property>
-    <property>
-        <name>dfs.namenode.rpc-address.nameservice1.namenode244</name>
-        <value>hadoop-test-nn2-9-12:8020</value>
-    </property>
-    <property>
-        <name>dfs.namenode.servicerpc-address.nameservice1.namenode244</name>
-        <value>hadoop-test-nn2-9-12:8022</value>
-    </property>
-    <property>
-        <name>dfs.namenode.http-address.nameservice1.namenode244</name>
-        <value>hadoop-test-nn2-9-12:50070</value>
-    </property>
-    <property>
-        <name>dfs.namenode.https-address.nameservice1.namenode244</name>
-        <value>hadoop-test-nn2-9-12:50470</value>
-    </property>
+
     <property>
         <name>dfs.replication</name>
         <value>3</value>
@@ -118,19 +111,6 @@
         <name>dfs.block.access.token.enable</name>
         <value>true</value>
     </property>
-    <property>
-        <name>dfs.namenode.kerberos.principal</name>
-        <value>hdfs/_HOST@DZTECH.COM</value>
-    </property>
-    <property>
-        <name>dfs.namenode.kerberos.internal.spnego.principal</name>
-        <value>HTTP/_HOST@DZTECH.COM</value>
-    </property>
-    <property>
-        <name>dfs.datanode.kerberos.principal</name>
-        <value>hdfs/_HOST@DZTECH.COM</value>
-    </property>
-
 
     <!-- 添加配置 -->
     <property>
@@ -154,19 +134,6 @@
     <property>
         <name>io.file.buffer.size</name>
         <value>65536</value>
-    </property>
-
-    <property>
-        <name>hadoop.security.authentication</name>
-        <value>kerberos</value>
-    </property>
-    <property>
-        <name>hadoop.security.authorization</name>
-        <value>true</value>
-    </property>
-    <property>
-        <name>hadoop.rpc.protection</name>
-        <value>authentication</value>
     </property>
 
     <!-- hive config -->
