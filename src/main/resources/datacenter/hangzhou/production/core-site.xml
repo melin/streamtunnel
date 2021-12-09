@@ -16,10 +16,12 @@
         <name>dfs.ha.namenodes.engine01</name>
         <value>nn1,nn2</value>
     </property>
+
     <property>
         <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
         <value>false</value>
     </property>
+
     <!-- 配置第一台服务器的namenode通信地址  -->
     <property>
         <name>dfs.namenode.rpc-address.engine01.nn1</name>
@@ -40,6 +42,7 @@
         <name>dfs.namenode.servicerpc-address.engine01.nn2</name>
         <value>node2.hadoop02.aloudata.work:8022</value>
     </property>
+
     <!-- 第一台服务器namenode的web访问地址  -->
     <property>
         <name>dfs.namenode.http-address.engine01.nn1</name>
@@ -51,33 +54,71 @@
         <value>node2.hadoop02.aloudata.work:50070</value>
     </property>
 
+    <!-- journalNode的访问地址，注意这个地址一定要配置 -->
+    <property>
+        <name>dfs.namenode.shared.edits.dir</name>
+        <value>
+            qjournal://node1.hadoop02.aloudata.work:8485;node2.hadoop02.aloudata.work:8485;node3.hadoop02.aloudata.work:8485/engine01
+        </value>
+    </property>
+    <!--  指定故障自动恢复使用的哪个java类 -->
+    <property>
+        <name>dfs.client.failover.proxy.provider.engine01</name>
+        <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+    </property>
+    <property>
+        <name>dfs.ha.automatic-failover.enabled.nameservice1</name>
+        <value>true</value>
+    </property>
+    <!-- 故障转移使用的哪种通信机制 -->
+    <property>
+        <name>dfs.ha.fencing.methods</name>
+        <value>sshfence</value>
+    </property>
+
+    <!-- 指定通信使用的公钥  -->
+    <property>
+        <name>dfs.ha.fencing.ssh.private-key-files</name>
+        <value>/data/.id_rsa</value>
+    </property>
+    <!-- journalNode数据存放地址  -->
+    <property>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>/data/data/hadoop/dfs/jn</value>
+    </property>
+    <!-- 启用自动故障恢复功能 -->
+    <property>
+        <name>dfs.ha.automatic-failover.enabled</name>
+        <value>true</value>
+    </property>
+    <!-- namenode产生的文件存放路径 -->
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:///data/data/hadoop/dfs/nn/name</value>
+    </property>
+    <!-- edits产生的文件存放路径 -->
+    <property>
+        <name>dfs.namenode.edits.dir</name>
+        <value>file:///data/data/hadoop/dfs/nn/edits</value>
+    </property>
+    <!-- dataNode文件存放路径 -->
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file:///data/data/hadoop/dfs/dn</value>
+    </property>
+    <!-- 关闭hdfs的文件权限 -->
+    <property>
+        <name>dfs.permissions</name>
+        <value>false</value>
+    </property>
     <property>
         <name>dfs.replication</name>
         <value>3</value>
     </property>
+    <!-- 指定block文件块的大小 -->
     <property>
         <name>dfs.blocksize</name>
         <value>134217728</value>
-    </property>
-    <property>
-        <name>dfs.client.use.datanode.hostname</name>
-        <value>false</value>
-    </property>
-    <property>
-        <name>fs.permissions.umask-mode</name>
-        <value>022</value>
-    </property>
-    <property>
-        <name>dfs.encrypt.data.transfer.algorithm</name>
-        <value>3des</value>
-    </property>
-    <property>
-        <name>dfs.encrypt.data.transfer.cipher.suites</name>
-        <value>AES/CTR/NoPadding</value>
-    </property>
-    <property>
-        <name>dfs.encrypt.data.transfer.cipher.key.bitlength</name>
-        <value>256</value>
     </property>
     <property>
         <name>dfs.namenode.acls.enabled</name>
@@ -109,6 +150,10 @@
     </property>
     <property>
         <name>dfs.block.access.token.enable</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>ipc.client.fallback-to-simple-auth-allowed</name>
         <value>true</value>
     </property>
 
