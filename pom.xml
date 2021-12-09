@@ -13,7 +13,7 @@
         <maven.compiler.target>8</maven.compiler.target>
 
         <druid.version>1.2.8</druid.version>
-        <mysql.version>5.1.49</mysql.version>
+        <mysql.version>8.0.27</mysql.version>
         <hadoop.version>3.3.1</hadoop.version>
         <hive.version>2.3.9</hive.version>
     </properties>
