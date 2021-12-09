@@ -176,6 +176,10 @@
                     <groupId>com.sun.jersey</groupId>
                     <artifactId>jersey-servlet</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.parquet</groupId>
+                    <artifactId>parquet-hadoop-bundle</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
