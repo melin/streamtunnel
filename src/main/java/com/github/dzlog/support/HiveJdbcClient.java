@@ -97,35 +97,12 @@ public class HiveJdbcClient implements InitializingBean {
             conn = DriverManager.getConnection(url, "dzlog", "dzlog");
             stmt = conn.createStatement();
 
-            StringBuilder sb = new StringBuilder("ALTER TABLE ");
-            sb.append(tableName).append(" ADD PARTITION (ds='").append(partition).append("')");
-            stmt.execute(sb.toString());
+            stmt.execute("ALTER TABLE " + tableName + " IF NOT EXISTS ADD PARTITION (ds='" + partition + "')");
 
             LOGGER.info("add partition {} for table {}", partition, tableName);
             return true;
         } catch (Exception e) {
             LOGGER.warn("hive url: " + url + ", add partition for table" + tableName + ", " + e.getMessage());
-            return false;
-        } finally {
-            JdbcUtils.closeConnection(conn);
-            JdbcUtils.closeStatement(stmt);
-        }
-    }
-
-    public Boolean repairTable(String tableName) {
-        Connection conn = null;
-        Statement stmt = null;
-        try {
-            String url = getSparkJdbcUrl();
-            conn = DriverManager.getConnection(url, "dclog", "dclog");
-            stmt = conn.createStatement();
-            String sql = "MSCK REPAIR TABLE " + tableName;
-            LOGGER.info("msck repair table: {}", sql);
-            stmt.execute(sql);
-
-            return true;
-        } catch (Exception e) {
-            LOGGER.warn("repair table {} error: {}", tableName, e.getMessage());
             return false;
         } finally {
             JdbcUtils.closeConnection(conn);

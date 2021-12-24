@@ -280,8 +280,9 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 			LogCollectConfig collectConfig = dcLogCollectService.getDcLogByCode(collectCode);
 			if (collectConfig == null) {
 				LOGGER.error("采集不存在: {}", collectCode);
+			} else {
+				changeHivePartition(collectConfig, topicPartition, currentHivePartition);
 			}
-			changeHivePartition(collectConfig, topicPartition, currentHivePartition);
 
 			receiverHandler.get().flushTopic("idle", topicPartition);
 		}
