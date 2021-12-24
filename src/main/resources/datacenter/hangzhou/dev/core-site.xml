@@ -3,17 +3,17 @@
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://engine01:8020</value>
+        <value>hdfs://newns:8020</value>
     </property>
 
     <!--  指定命名空间  -->
     <property>
         <name>dfs.nameservices</name>
-        <value>engine01</value>
+        <value>newns</value>
     </property>
     <!--  指定该命名空间下的两个机器作为我们的NameNode  -->
     <property>
-        <name>dfs.ha.namenodes.engine01</name>
+        <name>dfs.ha.namenodes.newns</name>
         <value>nn1,nn2</value>
     </property>
 
@@ -24,42 +24,40 @@
 
     <!-- 配置第一台服务器的namenode通信地址  -->
     <property>
-        <name>dfs.namenode.rpc-address.engine01.nn1</name>
-        <value>node1.hadoop02.aloudata.work:8020</value>
+        <name>dfs.namenode.rpc-address.newns.nn1</name>
+        <value>node1.hadoop01.aloudata.work:8020</value>
     </property>
     <!--  配置第二台服务器的namenode通信地址  -->
     <property>
-        <name>dfs.namenode.rpc-address.engine01.nn2</name>
-        <value>node2.hadoop02.aloudata.work:8020</value>
+        <name>dfs.namenode.rpc-address.newns.nn2</name>
+        <value>node2.hadoop01.aloudata.work:8020</value>
     </property>
     <!-- 所有从节点之间相互通信端口地址 -->
     <property>
-        <name>dfs.namenode.servicerpc-address.engine01.nn1</name>
-        <value>node1.hadoop02.aloudata.work:8022</value>
+        <name>dfs.namenode.servicerpc-address.newns.nn1</name>
+        <value>node1.hadoop01.aloudata.work:8022</value>
     </property>
     <!-- 所有从节点之间相互通信端口地址 -->
     <property>
-        <name>dfs.namenode.servicerpc-address.engine01.nn2</name>
-        <value>node2.hadoop02.aloudata.work:8022</value>
+        <name>dfs.namenode.servicerpc-address.newns.nn2</name>
+        <value>node2.hadoop01.aloudata.work:8022</value>
     </property>
 
     <!-- 第一台服务器namenode的web访问地址  -->
     <property>
-        <name>dfs.namenode.http-address.engine01.nn1</name>
-        <value>node1.hadoop02.aloudata.work:50070</value>
+        <name>dfs.namenode.http-address.newns.nn1</name>
+        <value>node1.hadoop01.aloudata.work:50070</value>
     </property>
     <!-- 第二台服务器namenode的web访问地址  -->
     <property>
-        <name>dfs.namenode.http-address.engine01.nn2</name>
-        <value>node2.hadoop02.aloudata.work:50070</value>
+        <name>dfs.namenode.http-address.newns.nn2</name>
+        <value>node2.hadoop01.aloudata.work:50070</value>
     </property>
 
     <!-- journalNode的访问地址，注意这个地址一定要配置 -->
     <property>
         <name>dfs.namenode.shared.edits.dir</name>
-        <value>
-            qjournal://node1.hadoop02.aloudata.work:8485;node2.hadoop02.aloudata.work:8485;node3.hadoop02.aloudata.work:8485/engine01
-        </value>
+        <value>qjournal://node1.hadoop01.aloudata.work:8485;node2.hadoop01.aloudata.work:8485;node3.hadoop01.aloudata.work:8485/newns</value>
     </property>
     <!--  指定故障自动恢复使用的哪个java类 -->
     <property>

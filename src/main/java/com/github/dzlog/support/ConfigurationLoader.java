@@ -4,6 +4,9 @@ import com.gitee.bee.core.conf.BeeConfigClient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +89,10 @@ public class ConfigurationLoader implements InitializingBean {
                     throw new RuntimeException("afterPropertiesSet,kerberos login error: " + e1.getMessage());
                 }
             }
+
+            String warehouse = configuration.get("hive.metastore.warehouse.dir");
+            FileStatus[] fileStatus = FileSystem.get(configuration).listStatus(new Path(warehouse));
+            Assert.isTrue(fileStatus.length > 0, "检测hadoop 配置失败");
         } catch (Throwable e) {
             throw new RuntimeException("加载hadoop、 hive配置文件失败: " + configPath, e);
         }
