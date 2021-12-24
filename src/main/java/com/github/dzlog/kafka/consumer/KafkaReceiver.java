@@ -291,11 +291,8 @@ public class KafkaReceiver implements ConsumerSeekAware, ApplicationContextAware
 	private void changeHivePartition(LogCollectConfig collectConfig, String topicPartition, String currentHivePartition) {
 		String lastHivePartition = topicPartitionLastHivePartition.get(topicPartition);
 		if (lastHivePartition == null) {
-			lastHivePartition = currentHivePartition;
 			topicPartitionLastHivePartition.put(topicPartition, currentHivePartition);
-		}
-
-		if (lastHivePartition != null && !lastHivePartition.equals(currentHivePartition)) {
+		} else if (!lastHivePartition.equals(currentHivePartition)) {
 			topicPartitionLastHivePartition.put(topicPartition, currentHivePartition);
 			hivePartitionService.addPartitionInfo(collectConfig, lastHivePartition);
 		}
