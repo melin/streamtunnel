@@ -97,7 +97,7 @@ public class HiveJdbcClient implements InitializingBean {
             conn = DriverManager.getConnection(url, "dzlog", "dzlog");
             stmt = conn.createStatement();
 
-            stmt.execute("ALTER TABLE " + tableName + " IF NOT EXISTS ADD PARTITION (ds='" + partition + "')");
+            stmt.execute("ALTER TABLE " + tableName + " ADD IF NOT EXISTS PARTITION (ds='" + partition + "')");
 
             LOGGER.info("add partition {} for table {}", partition, tableName);
             return true;
