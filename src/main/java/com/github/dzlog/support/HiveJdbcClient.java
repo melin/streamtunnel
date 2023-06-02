@@ -1,6 +1,6 @@
 package com.github.dzlog.support;
 
-import com.gitee.bee.core.conf.BeeConfigClient;
+import com.gitee.melin.bee.core.conf.BeeConfigClient;
 import com.github.dzlog.util.NetUtils;
 import com.github.dzlog.util.ThreadUtils;
 import com.google.common.collect.Lists;

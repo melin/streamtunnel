@@ -1,6 +1,6 @@
 package com.github.dzlog.kafka.consumer;
 
-import com.gitee.bee.core.conf.BeeConfigClient;
+import com.gitee.melin.bee.core.conf.BeeConfigClient;
 import com.github.dzlog.entity.LogCollectMetric;
 import com.github.dzlog.kafka.LogEvent;
 import com.github.dzlog.kafka.TopicConsumerInfo;

@@ -1,6 +1,9 @@
 package com.github.dzlog;
 
-import com.gitee.bee.core.conf.*;
+import com.gitee.melin.bee.core.conf.BeeConf;
+import com.gitee.melin.bee.core.conf.ConfigEntry;
+import com.gitee.melin.bee.core.conf.MapIntegerValue;
+import com.gitee.melin.bee.core.conf.MapStringValue;
 
 /**
  * @author melin

@@ -41,7 +41,7 @@
             <artifactId>spring-jdbc</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.gitee.bee</groupId>
+            <groupId>com.gitee.melin.bee</groupId>
             <artifactId>bee</artifactId>
             <version>1.6.1</version>
         </dependency>

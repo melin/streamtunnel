@@ -1,6 +1,6 @@
 package com.github.dzlog.support;
 
-import com.gitee.bee.core.conf.BeeConfigClient;
+import com.gitee.melin.bee.core.conf.BeeConfigClient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;

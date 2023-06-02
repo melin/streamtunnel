@@ -1,6 +1,6 @@
 package com.github.dzlog.kafka;
 
-import com.gitee.bee.core.conf.BeeConfigClient;
+import com.gitee.melin.bee.core.conf.BeeConfigClient;
 import com.github.dzlog.kafka.consumer.KafkaReceiver;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.ByteBufferDeserializer;
